@@ -19885,25 +19885,25 @@
       }
     },
     "server.section.usage" : {
-      "comment" : "Section heading for the local usage history switch in Server screen",
+      "comment" : "Section heading for the local usage history and benchmark upload switches in Server screen",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usage History"
+            "value" : "Usage & Sharing"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "История использования"
+            "value" : "Использование и обмен"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "使用历史"
+            "value" : "使用与共享"
           }
         }
       }
@@ -19952,6 +19952,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在 usage.sqlite3 中存储各模型每小时的 Token 总量。关闭后会保留现有历史。"
+          }
+        }
+      }
+    },
+    "server.row.benchmark_upload" : {
+      "comment" : "Row label for the switch that publishes benchmark runs to the omlx.ai leaderboard",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upload benchmark results"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отправлять результаты тестов"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上传基准测试结果"
+          }
+        }
+      }
+    },
+    "server.row.benchmark_upload.sub" : {
+      "comment" : "Sublabel explaining the benchmark upload switch",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publishes runs to the omlx.ai leaderboard with your hardware profile and an anonymous machine ID. Off keeps runs and local results."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикует прогоны в рейтинге omlx.ai вместе с профилем оборудования и анонимным идентификатором машины. При отключении прогоны и локальные результаты сохраняются."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将运行结果发布到 omlx.ai 排行榜，并附带硬件配置和匿名机器标识。关闭后会保留运行记录和本地结果。"
           }
         }
       }

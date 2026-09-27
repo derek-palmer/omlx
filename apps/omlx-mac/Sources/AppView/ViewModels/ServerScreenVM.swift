@@ -18,9 +18,14 @@ final class ServerScreenVM {
     var basePathText: String = AppConfig.defaultBasePath()
     var modelDirTexts: [String] = [""]
     var hfCacheEnabled: Bool = true
-    /// Live switch; commits through `saveUsageHistory()` like the other
-    /// auto-apply rows rather than the Apply button.
+    /// Live switch; commits through `saveUsageHistory(previous:)` like the
+    /// other auto-apply rows rather than the Apply button, and reverts if the
+    /// request does not land.
     var usageHistoryEnabled: Bool = true
+    /// Opt-out for publishing benchmark runs to the omlx.ai leaderboard.
+    /// Defaults on to match the server, and is independent of the history
+    /// switch above — local results are kept either way.
+    var benchmarkUploadEnabled: Bool = true
     var lastError: String?
     private(set) var isMovingBasePath: Bool = false
 
@@ -85,6 +90,7 @@ final class ServerScreenVM {
             }
             self.hfCacheEnabled = dto.huggingface?.hfCacheEnabled ?? true
             self.usageHistoryEnabled = dto.usage?.usageHistory ?? true
+            self.benchmarkUploadEnabled = dto.usage?.benchmarkUpload ?? true
             if let s = dto.sampling {
                 self.samplingContextText = String(s.maxContextWindow)
                 self.samplingMaxTokensText = String(s.maxTokens)
@@ -587,8 +593,27 @@ final class ServerScreenVM {
         Task { await commit(GlobalSettingsPatch(sseKeepaliveMode: sseKeepaliveMode)) }
     }
 
-    func saveUsageHistory() {
-        Task { await commit(GlobalSettingsPatch(usageHistory: usageHistoryEnabled)) }
+    func saveUsageHistory(previous: Bool) {
+        Task {
+            guard await commit(GlobalSettingsPatch(usageHistory: usageHistoryEnabled))
+            else {
+                usageHistoryEnabled = previous
+                return
+            }
+        }
+    }
+
+    func saveBenchmarkUpload(previous: Bool) {
+        // The switch is a privacy control: showing "off" while the server
+        // still publishes is worse than a failed write, so put the row back
+        // to the server's value when the request does not land.
+        Task {
+            guard await commit(GlobalSettingsPatch(benchmarkUpload: benchmarkUploadEnabled))
+            else {
+                benchmarkUploadEnabled = previous
+                return
+            }
+        }
     }
 
     func saveAutoStartOnLaunch(services: AppServices) {
@@ -621,6 +646,24 @@ final class ServerScreenVM {
                 let changed = binding.wrappedValue != newValue
                 binding.wrappedValue = newValue
                 if changed { save() }
+            }
+        )
+    }
+
+    /// Variant that hands the save closure the value being replaced, so a
+    /// failed request can put the row back instead of leaving the UI showing
+    /// a value the server never accepted.
+    func bind<T: Equatable>(
+        _ binding: Binding<T>,
+        save: @escaping (T) -> Void
+    ) -> Binding<T> {
+        Binding(
+            get: { binding.wrappedValue },
+            set: { newValue in
+                let previous = binding.wrappedValue
+                let changed = previous != newValue
+                binding.wrappedValue = newValue
+                if changed { save(previous) }
             }
         )
     }

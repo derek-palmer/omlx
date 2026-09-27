@@ -5,7 +5,10 @@ Yesterday, 7/30/90 Days, and This Month, with model filtering, token totals,
 per-model generation speed, and a day/hour token heatmap. History starts when
 this version first serves requests; existing all-time totals cannot be backfilled.
 
-Usage stays on this server. No telemetry is sent. Only the canonical oMLX model
+Usage stays on this server. Nothing on this page is ever uploaded. (Benchmark
+runs are a separate feature that *does* publish to omlx.ai by default — see
+[Community benchmark submission](#community-benchmark-submission) below for what
+it sends and how to turn it off.) Only the canonical oMLX model
 ID, hourly bucket, request/token counts, and accumulated durations are stored.
 There are no prompts, responses, messages, token IDs, API keys, headers, client
 IPs, upload names, or document contents. Model IDs are the same identifiers used
@@ -81,8 +84,8 @@ Clearing Session or All Time in the dashboard does not erase history.
 ## Disabling
 
 Usage history is on by default. Turn it off with the **Record usage history**
-switch (web dashboard: Settings → Usage History; macOS app: Server → Usage
-History), or set `usage.usage_history` to `false` in `settings.json`. The
+switch (web dashboard: Settings → Usage & Sharing; macOS app: Server → Usage &
+Sharing), or set `usage.usage_history` to `false` in `settings.json`. The
 `OMLX_USAGE_HISTORY` environment variable (`0`/`false`/`off` or `1`/`true`/`on`)
 overrides the saved value at startup.
 
@@ -121,3 +124,66 @@ login flow:
 curl -b /path/to/admin-cookies.txt \
   'http://127.0.0.1:8000/admin/api/usage?range=month&model=your-model-id'
 ```
+
+# Community benchmark submission
+
+Separate from usage history, and the only thing oMLX sends off the machine by
+default. Running a benchmark from the admin panel publishes the result to the
+[omlx.ai](https://omlx.ai/benchmarks) community leaderboard when it finishes.
+Both benchmark types do this: throughput (PP/TG) and intelligence (accuracy
+suites such as MMLU and GSM8K).
+
+Uploads happen only for runs you start. Nothing is sent in the background, on a
+schedule, or while merely serving requests.
+
+## What is sent
+
+Every submission includes:
+
+- **Hardware**: chip name and variant, GPU core count, total memory, OS version.
+- **`owner_hash`**: a hash of the machine's IOPlatformUUID combined with the
+  chip, core count, and memory. It is stable across runs, which is what lets
+  the leaderboard group and verify your submissions — so it is a persistent
+  pseudonymous machine identifier, not a random per-run value.
+- **Model**: canonical model name, org-qualified repo id, detected quantization.
+- **Run**: oMLX version, scores/timings, sampling profile, batch size,
+  acceleration feature flags, and an allowlisted subset of model settings.
+
+Intelligence runs additionally PUT a gzipped per-question record: question id,
+correct/expected/predicted, category, per-question time, and a length-capped
+`raw_response` — the model's own output for each question. Question *text* is
+never uploaded (datasets ship inside oMLX and sampling is seeded, so an id
+reconstructs the prompt locally). Runs under 100 questions are not uploaded.
+
+Prompts, responses, and messages from ordinary serving traffic are never part of
+this — only the benchmark's own generated answers.
+
+## Disabling
+
+Uploads are on by default. Turn them off with the **Upload benchmark results**
+switch (web dashboard: Settings → Usage & Sharing; macOS app: Server → Usage &
+Sharing), or set `usage.benchmark_upload` to `false` in `settings.json`. The
+`OMLX_BENCHMARK_UPLOAD` environment variable (`0`/`false`/`off` or
+`1`/`true`/`on`) overrides the saved value at startup.
+
+The switch is read when a run reaches its upload step, so it applies to the next
+run with no restart. With it off, a run never builds its upload context, so that
+run neither derives `owner_hash` nor reads the platform UUID — for the run, off
+means the fingerprint is not derived, not derived-and-discarded.
+
+One separate local read remains. The Throughput Benchmark screen calls
+`GET /admin/api/device-info` to show a hardware chip, and that endpoint derives
+`owner_hash` for display. It returns the value to your own admin client and
+uploads nothing.
+
+Benchmarks themselves are unaffected: runs still execute, scores still appear in
+the admin panel, and accumulated results are still kept locally. Only publishing
+stops.
+
+The stream contract differs by benchmark type. A throughput run ends with a
+terminal `upload_skipped` event carrying reason `upload_disabled` instead of
+`upload_done`. An intelligence run uploads per suite, so its per-suite `upload`
+events are simply omitted and the terminal `done` event is unchanged.
+
+This switch does not retract submissions already published. Removing an existing
+leaderboard entry is a request to omlx.ai, not a local setting.

@@ -19,6 +19,7 @@ from typing import Any, Literal, Optional
 from pydantic import BaseModel, field_validator, model_validator
 
 from .accuracy_upload import build_upload_context, upload_intelligence_result
+from .benchmark import is_benchmark_upload_enabled
 from .external_api import (
     ExternalAPIClient,
     ExternalChatAdapter,
@@ -467,10 +468,20 @@ async def run_accuracy_benchmark(
             # Snapshot the upload context (hardware, quantization, feature
             # flags, submission group). A failure here only disables the
             # community upload, never the benchmark itself.
-            try:
-                run.upload_ctx = build_upload_context(request, engine_pool)
-            except Exception as e:
-                logger.warning(f"Accuracy upload context unavailable: {e}")
+            #
+            # With uploads turned off in Settings the context is never built,
+            # so the hardware fingerprint is not computed at all; upload_ctx
+            # stays None and the existing guard at the upload site suppresses
+            # the POST. Results still accumulate and render locally.
+            if not is_benchmark_upload_enabled():
+                logger.info(
+                    "Accuracy upload disabled in settings; results stay local"
+                )
+            else:
+                try:
+                    run.upload_ctx = build_upload_context(request, engine_pool)
+                except Exception as e:
+                    logger.warning(f"Accuracy upload context unavailable: {e}")
 
         # Phase 3: Run each benchmark
         run.phase = "evaluating"
@@ -660,7 +671,31 @@ async def run_accuracy_benchmark(
             # result_data is the same object stored in _accumulated_results,
             # so the outcome is visible to polling clients and SSE replay
             # without any extra state. Never fails the benchmark.
+            #
+            # Re-read the setting here rather than trusting the pre-evaluation
+            # snapshot alone. An intelligence run uploads once per suite, so a
+            # user who opts out while the first suite is still evaluating
+            # would otherwise keep publishing the later ones from a context
+            # built before they opted out. Reported through the normal
+            # per-suite `upload` event with the same `skipped` shape the
+            # min-questions threshold already uses, so the result card picks
+            # it up with no new event type.
             if run.upload_ctx is not None and run.status != "cancelled":
+                if not is_benchmark_upload_enabled():
+                    logger.info(
+                        "Accuracy upload disabled mid-run; result stays local"
+                    )
+                    result_data["upload"] = {"skipped": "upload_disabled"}
+                    await _send_event(run, {
+                        "type": "upload",
+                        "data": {
+                            "model_id": request.model_id,
+                            "benchmark": result_data["benchmark"],
+                            "skipped": "upload_disabled",
+                        },
+                    })
+                    continue
+
                 outcome = await upload_intelligence_result(
                     run, run.upload_ctx, result_data
                 )

@@ -558,6 +558,7 @@ class GlobalSettingsRequest(BaseModel):
 
     # Usage history settings
     usage_history: bool | None = None
+    benchmark_upload: bool | None = None
 
     # HuggingFace settings
     hf_endpoint: str | None = None
@@ -4146,6 +4147,7 @@ async def get_global_settings(is_admin: bool = Depends(require_admin)):
         },
         "usage": {
             "usage_history": global_settings.usage.usage_history,
+            "benchmark_upload": global_settings.usage.benchmark_upload,
         },
         "huggingface": {
             "endpoint": global_settings.huggingface.endpoint,
@@ -4800,6 +4802,12 @@ async def update_global_settings(
             # Disabling flushes to SQLite; keep that off the event loop.
             await asyncio.to_thread(history.set_enabled, request.usage_history)
         runtime_applied.append("usage_history")
+
+    # Benchmark upload is read from settings at the start of each run, so the
+    # switch takes effect on the next run with no restart and no runtime hook.
+    if request.benchmark_upload is not None:
+        global_settings.usage.benchmark_upload = request.benchmark_upload
+        runtime_applied.append("benchmark_upload")
 
     # Apply HuggingFace settings (Live - immediately applied via env var)
     if request.hf_endpoint is not None:

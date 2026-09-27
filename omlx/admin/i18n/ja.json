@@ -1902,9 +1902,11 @@
   "js.ane_tune.winner_parts": "Winner: {parts}",
   "settings.mcp.expose_tools": "バックエンドMCPツールをクライアントに公開",
   "settings.mcp.expose_tools_hint": "バックエンドのMCPツールをチャット応答にマージします。クライアントが独自のMCPサーバーを持つ場合は無効にしてください。",
-  "settings.usage.section_label": "使用履歴",
+  "settings.usage.section_label": "使用状況と共有",
   "settings.usage.history": "使用履歴を記録",
   "settings.usage.history_hint": "モデル別の1時間ごとのトークン合計をローカルの usage.sqlite3 に保存します。オフにしても既存の履歴は保持され、再びオンにすると記録を再開します。",
+  "settings.usage.benchmark_upload": "ベンチマーク結果をアップロード",
+  "settings.usage.benchmark_upload_hint": "完了したベンチマーク実行を omlx.ai のコミュニティリーダーボードに公開します。アップロードにはハードウェア構成と匿名のマシン ID が含まれます。オフにしても実行とローカルの結果はすべて保持され、公開のみが停止します。",
   "settings.integrations.markitdown.formats_badge": "PDF · DOCX · PPTX",
   "settings.integrations.websearch.provider_brave": "Brave Search",
   "settings.integrations.websearch.provider_ddgs_custom": "DDGS Custom",
@@ -1943,6 +1945,10 @@
   "usage.unavailable": "使用履歴を利用できません。推論は通常どおり続行します。",
   "usage.delayed": "履歴が不完全な可能性があります: 保存が遅延しているか、保留バッファがあふれました。",
   "usage.loading": "使用履歴を読み込み中…",
-  "usage.disabled": "使用履歴はオフです。設定 → 使用履歴でオンにしてください。",
-  "usage.open_settings": "設定を開く"
+  "usage.disabled": "使用履歴はオフです。設定 → 使用状況と共有でオンにしてください。",
+  "usage.open_settings": "設定を開く",
+  "bench.upload_skipped.reason_disabled": "設定でアップロードが無効になっているため、この結果は omlx.ai コミュニティベンチマークに公開されませんでした。",
+  "bench.upload_skipped.reason_ane_aligned": "ANE 揃えプロンプトは PP4097/8193 のような標準外の長さを使うため、これらの診断結果はコミュニティの PP4096 区分には入らず、ローカルに残します。",
+  "bench.upload_skipped.reason_unknown": "これらの結果は omlx.ai のコミュニティベンチマークにアップロードされませんでした。",
+  "acc_bench.upload.skipped_disabled": "未アップロード（コミュニティへのアップロードは無効）"
 }

@@ -137,7 +137,7 @@
                 cache: { enabled: true, ssd_cache_dir: '', ssd_cache_max_size: 'auto', hot_cache_max_size: '0', hot_cache_write_through: false, ane_compile_cache: false, initial_cache_blocks: 256, hot_cache_only: false, gdn_snapshot_storage: 'auto', gdn_ssd_split_enabled: true, gdn_ssd_pending_max_size: '512MB', gdn_sidecar_precision: 'fp32' },
                 sampling: { max_context_window: 32768, max_context_window_policy: null, max_tokens: 32768, temperature: 1.0, top_p: 0.95, top_k: 0, repetition_penalty: 1.0 },
                 mcp: { config_path: '', expose_tools: true },
-                usage: { usage_history: true },
+                usage: { usage_history: true, benchmark_upload: true },
                 huggingface: { endpoint: '', hf_cache_enabled: true, hf_cache_path: '' },
                 network: { http_proxy: '', https_proxy: '', no_proxy: '', ca_bundle: '' },
                 auth: { api_key_set: false, api_key: '', skip_api_key_verification: false, sub_keys: [] },
@@ -580,7 +580,7 @@
             benchUploadResults: [],
             benchUploadDone: null,
             benchUploading: false,
-            benchUploadSkipped: null,  // { reason } — only external-endpoint runs skip now
+            benchUploadSkipped: null,  // { reason, features } from upload_skipped
             benchUploadFlags: [],      // [{key, label}] acceleration active during the run
             // { bench_id, model_id } when the server reports a running bench
             // that is NOT the one this tab is displaying. Drives the "another
@@ -1094,6 +1094,7 @@
                             mcp_config: this.globalSettings.mcp.config_path,
                             mcp_expose_tools: this.globalSettings.mcp.expose_tools,
                             usage_history: this.globalSettings.usage.usage_history,
+                            benchmark_upload: this.globalSettings.usage.benchmark_upload,
                             hf_cache_enabled: this.globalSettings.huggingface.hf_cache_enabled,
                             network_http_proxy: this.globalSettings.network.http_proxy,
                             network_https_proxy: this.globalSettings.network.https_proxy,
@@ -4126,6 +4127,19 @@
                 }
             },
 
+            // One sentence per upload_skipped reason. Unknown reasons use a
+            // neutral fallback so they never inherit the external-endpoint copy.
+            benchUploadSkippedMessage() {
+                const reason = this.benchUploadSkipped && this.benchUploadSkipped.reason;
+                const keyByReason = {
+                    external_endpoint: 'bench.upload_skipped.reason_external',
+                    upload_disabled: 'bench.upload_skipped.reason_disabled',
+                    ane_aligned_prompt: 'bench.upload_skipped.reason_ane_aligned',
+                };
+                const key = keyByReason[reason] || 'bench.upload_skipped.reason_unknown';
+                return window.t(key);
+            },
+
             connectBenchSSE(benchId) {
                 if (this.benchEventSource) {
                     this.benchEventSource.close();
@@ -4193,8 +4207,11 @@
                             es.close();
                             this.benchEventSource = null;
                         } else if (data.type === 'upload_skipped') {
+                            // Keep the server reason. Defaulting a missing one
+                            // to external_endpoint would tell an opted-out user
+                            // that the run measured remote hardware.
                             this.benchUploadSkipped = {
-                                reason: data.reason || 'external_endpoint',
+                                reason: data.reason || null,
                                 features: data.features || [],
                             };
                             this.benchUploading = false;

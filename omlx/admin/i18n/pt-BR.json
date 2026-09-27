@@ -1902,9 +1902,11 @@
   "js.ane_tune.winner_parts": "Winner: {parts}",
   "settings.mcp.expose_tools": "Expor ferramentas MCP do backend para clientes",
   "settings.mcp.expose_tools_hint": "Mescla as ferramentas MCP do backend nas respostas. Desative se o seu cliente tiver seus próprios servidores MCP.",
-  "settings.usage.section_label": "Histórico de uso",
+  "settings.usage.section_label": "Uso e compartilhamento",
   "settings.usage.history": "Registrar histórico de uso",
   "settings.usage.history_hint": "Armazena localmente os totais de tokens por modelo e hora em usage.sqlite3. Desativar mantém o histórico existente; reativar retoma o registro.",
+  "settings.usage.benchmark_upload": "Enviar resultados de benchmark",
+  "settings.usage.benchmark_upload_hint": "Publica as execuções de benchmark concluídas no ranking da comunidade omlx.ai. Os envios incluem o perfil do seu hardware e um ID anônimo da máquina. Desativar mantém todas as execuções e seus resultados locais; apenas a publicação para.",
   "settings.integrations.markitdown.formats_badge": "PDF · DOCX · PPTX",
   "settings.integrations.websearch.provider_brave": "Brave Search",
   "settings.integrations.websearch.provider_ddgs_custom": "DDGS Custom",
@@ -1943,6 +1945,10 @@
   "usage.unavailable": "O histórico de uso está indisponível. A inferência continua normalmente.",
   "usage.delayed": "O histórico pode estar incompleto: o armazenamento está atrasado ou o buffer pendente transbordou.",
   "usage.loading": "Carregando uso…",
-  "usage.disabled": "O histórico de uso está desativado. Ative-o em Configurações → Histórico de uso.",
-  "usage.open_settings": "Abrir configurações"
+  "usage.disabled": "O histórico de uso está desativado. Ative-o em Configurações → Uso e compartilhamento.",
+  "usage.open_settings": "Abrir configurações",
+  "bench.upload_skipped.reason_disabled": "Os envios estão desativados nas Configurações, portanto este resultado não foi publicado nos benchmarks da comunidade do omlx.ai.",
+  "bench.upload_skipped.reason_ane_aligned": "Prompts alinhados ao ANE usam comprimentos fora do padrão, como PP4097/8193, então estes resultados de diagnóstico ficam locais em vez de entrar nos grupos PP4096 da comunidade.",
+  "bench.upload_skipped.reason_unknown": "Estes resultados não foram enviados aos benchmarks da comunidade omlx.ai.",
+  "acc_bench.upload.skipped_disabled": "Não enviado (envio para a comunidade está desativado)"
 }

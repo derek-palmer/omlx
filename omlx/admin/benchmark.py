@@ -200,7 +200,8 @@ class BenchmarkRun:
             "success_count": 0,
             "failed_count": 0,
             "owner_hash": None,  # display hash, populated on upload_done
-            "skipped_reason": None,  # only "external_endpoint" reaches this now
+            # external_endpoint | upload_disabled | ane_aligned_prompt
+            "skipped_reason": None,
             # Always empty. Kept because BenchDTO.swift declares it non-optional,
             # so dropping the key would fail decoding on every app build that has
             # not been updated — which turns into a per-second error loop while the
@@ -213,9 +214,10 @@ class BenchmarkRun:
 
 # Event types that close the SSE stream for a bench run. `done` is NOT
 # terminal — it marks "tests finished, upload starting"; the real end of
-# stream is `upload_done` (or `error`). `upload_skipped` is the external
-# endpoint's last event: without it here, subscribers to an external run would
-# wait for an `upload_done` that never comes.
+# stream is `upload_done` (or `error`). `upload_skipped` ends the stream when
+# nothing is published (external endpoint, upload opt-out, or ANE-aligned
+# prompts). Without it here, subscribers would wait for an `upload_done`
+# that never comes.
 _BENCH_TERMINAL_TYPES = frozenset({"upload_done", "upload_skipped", "error"})
 
 
@@ -1335,6 +1337,22 @@ def _upload_model_repo(
     return derived[:_MAX_MODEL_NAME_LEN]
 
 
+def is_benchmark_upload_enabled() -> bool:
+    """Whether completed runs may be published to the omlx.ai leaderboard.
+
+    Read once at the point a run would upload, so the Settings switch takes
+    effect on the next run without a restart. Settings are always initialized
+    on a real server; the uninitialized fallback keeps unit tests that never
+    call ``init_settings()`` on the pre-existing upload path.
+    """
+    from ..settings import get_settings
+
+    try:
+        return bool(get_settings().usage.benchmark_upload)
+    except RuntimeError:
+        return True
+
+
 def _sanitize_upload_error(resp: Any) -> str:
     """Extract a user-presentable error string from a failed upload response.
 
@@ -2070,6 +2088,23 @@ async def run_benchmark(run: BenchmarkRun, engine_pool: Any) -> None:
                 {
                     "type": "upload_skipped",
                     "reason": "ane_aligned_prompt",
+                    "features": run.feature_flags,
+                },
+            )
+            return
+
+        # Community upload turned off in Settings. The run, its results and
+        # local history are unaffected — only publishing stops, and the
+        # hardware fingerprint is never computed. upload_skipped is terminal,
+        # so SSE subscribers end here instead of waiting for upload_done.
+        if not is_benchmark_upload_enabled():
+            run.upload_state["phase"] = "skipped"
+            run.upload_state["skipped_reason"] = "upload_disabled"
+            await _send_event(
+                run,
+                {
+                    "type": "upload_skipped",
+                    "reason": "upload_disabled",
                     "features": run.feature_flags,
                 },
             )

@@ -1641,6 +1641,108 @@ class TestUploadToOmlxAi:
         assert "peak_footprint_gb" in payload
 
 
+class TestBenchmarkUploadDisabled:
+    """The Settings switch that stops results leaving the machine.
+
+    Off must suppress the POST *and* the hardware fingerprint, while
+    leaving the run, its results and local history untouched.
+    """
+
+    async def _run_with_upload(self, enabled):
+        run = BenchmarkRun(
+            bench_id="bench-upload-gate",
+            request=BenchmarkRequest(
+                model_id="test-model",
+                prompt_lengths=[1024],
+                generation_length=1,
+            ),
+        )
+        pool = _FakeBenchEnginePool()
+        upload = AsyncMock()
+        with (
+            patch(
+                "omlx.admin.benchmark.is_benchmark_upload_enabled",
+                return_value=enabled,
+            ),
+            patch("omlx.admin.benchmark._upload_to_omlx_ai", upload),
+        ):
+            await run_benchmark(run, pool)
+        return run, upload
+
+    @pytest.mark.asyncio
+    async def test_disabled_skips_upload_entirely(self):
+        run, upload = await self._run_with_upload(False)
+
+        upload.assert_not_awaited()
+        assert run.status == "completed"
+        # Results are produced and kept locally; only publishing stops.
+        assert run.results
+
+    @pytest.mark.asyncio
+    async def test_disabled_emits_terminal_upload_skipped(self):
+        """A subscriber must not wait for an upload_done that never comes."""
+        run, _ = await self._run_with_upload(False)
+
+        assert run.events[-1]["type"] == "upload_skipped"
+        assert run.events[-1]["reason"] == "upload_disabled"
+        assert run.upload_state["phase"] == "skipped"
+        assert run.upload_state["skipped_reason"] == "upload_disabled"
+        assert "upload_done" not in [e["type"] for e in run.events]
+
+    @pytest.mark.asyncio
+    async def test_enabled_still_uploads(self):
+        """The default path is unchanged."""
+        run, upload = await self._run_with_upload(True)
+
+        upload.assert_awaited_once()
+        assert "upload_skipped" not in [e["type"] for e in run.events]
+
+    @pytest.mark.asyncio
+    async def test_disabled_never_computes_owner_hash(self):
+        """Off means the fingerprint is not derived, not derived-and-dropped."""
+        run = BenchmarkRun(
+            bench_id="bench-no-fingerprint",
+            request=BenchmarkRequest(
+                model_id="test-model",
+                prompt_lengths=[1024],
+                generation_length=1,
+            ),
+        )
+        with (
+            patch(
+                "omlx.admin.benchmark.is_benchmark_upload_enabled",
+                return_value=False,
+            ),
+            patch("omlx.utils.hardware.compute_owner_hash") as owner_hash,
+            patch("omlx.utils.hardware.get_io_platform_uuid") as io_uuid,
+            patch("asyncio.to_thread", AsyncMock()) as to_thread,
+        ):
+            await run_benchmark(run, _FakeBenchEnginePool())
+
+        owner_hash.assert_not_called()
+        io_uuid.assert_not_called()
+        to_thread.assert_not_awaited()
+
+
+class TestIsBenchmarkUploadEnabled:
+    def test_reads_the_setting(self):
+        from omlx.admin.benchmark import is_benchmark_upload_enabled
+
+        settings = SimpleNamespace(usage=SimpleNamespace(benchmark_upload=False))
+        with patch("omlx.settings.get_settings", return_value=settings):
+            assert is_benchmark_upload_enabled() is False
+
+        settings.usage.benchmark_upload = True
+        with patch("omlx.settings.get_settings", return_value=settings):
+            assert is_benchmark_upload_enabled() is True
+
+    def test_uninitialized_settings_keep_the_existing_path(self):
+        from omlx.admin.benchmark import is_benchmark_upload_enabled
+
+        with patch("omlx.settings.get_settings", side_effect=RuntimeError):
+            assert is_benchmark_upload_enabled() is True
+
+
 _CF_INTERSTITIAL = (
     '<!DOCTYPE html><html lang="en-US"><head><title>Just a moment...</title>'
     '<meta http-equiv="refresh" content="360"></head><body><div class="main-wrapper">'

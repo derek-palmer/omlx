@@ -1902,9 +1902,11 @@
   "js.ane_tune.winner_parts": "Winner: {parts}",
   "settings.mcp.expose_tools": "Expose backend MCP tools to clients",
   "settings.mcp.expose_tools_hint": "Merge backend MCP tools into chat completions. Disable if your client has its own MCP servers.",
-  "settings.usage.section_label": "Usage History",
+  "settings.usage.section_label": "Usage & Sharing",
   "settings.usage.history": "Record usage history",
   "settings.usage.history_hint": "Store hourly per-model token totals locally in usage.sqlite3. Turning this off keeps existing history; turning it back on resumes recording.",
+  "settings.usage.benchmark_upload": "Upload benchmark results",
+  "settings.usage.benchmark_upload_hint": "Publish completed benchmark runs to the omlx.ai community leaderboard. Uploads include your hardware profile and an anonymous machine ID. Turning this off keeps every run and its local results; only publishing stops.",
   "settings.integrations.markitdown.formats_badge": "PDF · DOCX · PPTX",
   "settings.integrations.websearch.provider_brave": "Brave Search",
   "settings.integrations.websearch.provider_ddgs_custom": "DDGS Custom",
@@ -1943,6 +1945,10 @@
   "usage.unavailable": "Usage history is unavailable. Inference continues normally.",
   "usage.delayed": "History may be incomplete: storage is delayed or the pending buffer overflowed.",
   "usage.loading": "Loading usage…",
-  "usage.disabled": "Usage history is off. Turn it on in Settings → Usage History.",
-  "usage.open_settings": "Open Settings"
+  "usage.disabled": "Usage history is off. Turn it on in Settings → Usage & Sharing.",
+  "usage.open_settings": "Open Settings",
+  "bench.upload_skipped.reason_disabled": "Uploads are turned off in Settings, so this result was not published to omlx.ai community benchmarks.",
+  "bench.upload_skipped.reason_ane_aligned": "ANE-aligned prompts use non-standard lengths such as PP4097/8193, so these diagnostic results stay local instead of joining the community PP4096 buckets.",
+  "bench.upload_skipped.reason_unknown": "These results were not uploaded to the omlx.ai community benchmarks.",
+  "acc_bench.upload.skipped_disabled": "Not uploaded (community upload is off)"
 }

@@ -837,20 +837,32 @@ class UISettings:
 
 @dataclass
 class UsageSettings:
-    """Local usage history settings."""
+    """What this install records locally and publishes externally."""
 
     # Record hourly per-model serving aggregates to <base_path>/usage.sqlite3.
     # Turning this off stops recording; existing history is kept on disk.
     usage_history: bool = True
 
+    # Publish completed benchmark runs to the omlx.ai community leaderboard.
+    # Turning this off stops the upload and the hardware fingerprint it
+    # carries from being computed at all; runs and local results are
+    # unaffected. Defaults on to preserve existing installs' behaviour.
+    benchmark_upload: bool = True
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
-        return {"usage_history": self.usage_history}
+        return {
+            "usage_history": self.usage_history,
+            "benchmark_upload": self.benchmark_upload,
+        }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> UsageSettings:
         """Create from dictionary."""
-        return cls(usage_history=data.get("usage_history", True))
+        return cls(
+            usage_history=data.get("usage_history", True),
+            benchmark_upload=data.get("benchmark_upload", True),
+        )
 
 
 @dataclass
@@ -1258,9 +1270,16 @@ class GlobalSettings:
             except ValueError:
                 logger.warning(f"Invalid OMLX_LOG_RETENTION_DAYS: {retention_days}")
 
-        # Usage history settings
+        # Usage & sharing settings
         if usage_history := os.getenv("OMLX_USAGE_HISTORY"):
             self.usage.usage_history = usage_history.strip().lower() in {
+                "1",
+                "true",
+                "yes",
+                "on",
+            }
+        if benchmark_upload := os.getenv("OMLX_BENCHMARK_UPLOAD"):
+            self.usage.benchmark_upload = benchmark_upload.strip().lower() in {
                 "1",
                 "true",
                 "yes",
