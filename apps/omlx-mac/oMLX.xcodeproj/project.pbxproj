@@ -107,6 +107,7 @@
 		DBB000000000000000000001 /* AppServicesPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC000000000000000000001 /* AppServicesPathTests.swift */; };
 		DBB000000000000000000002 /* AppConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC000000000000000000002 /* AppConfigTests.swift */; };
 		DBB000000000000000000003 /* ServerScreenVMStorageDiffTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC000000000000000000003 /* ServerScreenVMStorageDiffTests.swift */; };
+		DBB000000000000000000120 /* ServerScreenVMUsageSwitchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC000000000000000000120 /* ServerScreenVMUsageSwitchTests.swift */; };
 		DBB000000000000000000004 /* ProfileDTODecodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC000000000000000000004 /* ProfileDTODecodeTests.swift */; };
 		DBB000000000000000000005 /* SamplingValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC000000000000000000005 /* SamplingValidatorTests.swift */; };
 		DBB000000000000000000006 /* APIKeyGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC000000000000000000006 /* APIKeyGeneratorTests.swift */; };
@@ -252,6 +253,7 @@
 		DCC000000000000000000001 /* AppServicesPathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServicesPathTests.swift; sourceTree = "<group>"; };
 		DCC000000000000000000002 /* AppConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigTests.swift; sourceTree = "<group>"; };
 		DCC000000000000000000003 /* ServerScreenVMStorageDiffTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerScreenVMStorageDiffTests.swift; sourceTree = "<group>"; };
+		DCC000000000000000000120 /* ServerScreenVMUsageSwitchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerScreenVMUsageSwitchTests.swift; sourceTree = "<group>"; };
 		DCC000000000000000000004 /* ProfileDTODecodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDTODecodeTests.swift; sourceTree = "<group>"; };
 		DCC000000000000000000005 /* SamplingValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SamplingValidatorTests.swift; sourceTree = "<group>"; };
 		DCC000000000000000000006 /* APIKeyGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyGeneratorTests.swift; sourceTree = "<group>"; };
@@ -326,6 +328,7 @@
 				DCC000000000000000000001 /* AppServicesPathTests.swift */,
 				DCC000000000000000000002 /* AppConfigTests.swift */,
 				DCC000000000000000000003 /* ServerScreenVMStorageDiffTests.swift */,
+				DCC000000000000000000120 /* ServerScreenVMUsageSwitchTests.swift */,
 				DCC000000000000000000004 /* ProfileDTODecodeTests.swift */,
 				DCC000000000000000000005 /* SamplingValidatorTests.swift */,
 				DCC000000000000000000006 /* APIKeyGeneratorTests.swift */,
@@ -797,6 +800,7 @@
 				DBB000000000000000000001 /* AppServicesPathTests.swift in Sources */,
 				DBB000000000000000000002 /* AppConfigTests.swift in Sources */,
 				DBB000000000000000000003 /* ServerScreenVMStorageDiffTests.swift in Sources */,
+				DBB000000000000000000120 /* ServerScreenVMUsageSwitchTests.swift in Sources */,
 				DBB000000000000000000004 /* ProfileDTODecodeTests.swift in Sources */,
 				DBB000000000000000000005 /* SamplingValidatorTests.swift in Sources */,
 				DBB000000000000000000006 /* APIKeyGeneratorTests.swift in Sources */,

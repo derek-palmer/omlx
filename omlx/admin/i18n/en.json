@@ -1945,6 +1945,10 @@
   "usage.unavailable": "Usage history is unavailable. Inference continues normally.",
   "usage.delayed": "History may be incomplete: storage is delayed or the pending buffer overflowed.",
   "usage.loading": "Loading usage…",
-  "usage.disabled": "Usage history is off. Turn it on in Settings → Usage History.",
-  "usage.open_settings": "Open Settings"
+  "usage.disabled": "Usage history is off. Turn it on in Settings → Usage & Sharing.",
+  "usage.open_settings": "Open Settings",
+  "bench.upload_skipped.reason_disabled": "Uploads are turned off in Settings, so this result was not published to omlx.ai community benchmarks.",
+  "bench.upload_skipped.reason_ane_aligned": "ANE-aligned prompts use non-standard lengths such as PP4097/8193, so these diagnostic results stay local instead of joining the community PP4096 buckets.",
+  "bench.upload_skipped.reason_unknown": "These results were not uploaded to the omlx.ai community benchmarks.",
+  "acc_bench.upload.skipped_disabled": "Not uploaded (community upload is off)"
 }

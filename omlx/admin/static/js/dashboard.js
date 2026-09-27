@@ -580,7 +580,7 @@
             benchUploadResults: [],
             benchUploadDone: null,
             benchUploading: false,
-            benchUploadSkipped: null,  // { reason } — only external-endpoint runs skip now
+            benchUploadSkipped: null,  // { reason, features } from upload_skipped
             benchUploadFlags: [],      // [{key, label}] acceleration active during the run
             // { bench_id, model_id } when the server reports a running bench
             // that is NOT the one this tab is displaying. Drives the "another
@@ -4127,6 +4127,19 @@
                 }
             },
 
+            // One sentence per upload_skipped reason. Unknown reasons use a
+            // neutral fallback so they never inherit the external-endpoint copy.
+            benchUploadSkippedMessage() {
+                const reason = this.benchUploadSkipped && this.benchUploadSkipped.reason;
+                const keyByReason = {
+                    external_endpoint: 'bench.upload_skipped.reason_external',
+                    upload_disabled: 'bench.upload_skipped.reason_disabled',
+                    ane_aligned_prompt: 'bench.upload_skipped.reason_ane_aligned',
+                };
+                const key = keyByReason[reason] || 'bench.upload_skipped.reason_unknown';
+                return window.t(key);
+            },
+
             connectBenchSSE(benchId) {
                 if (this.benchEventSource) {
                     this.benchEventSource.close();
@@ -4194,8 +4207,11 @@
                             es.close();
                             this.benchEventSource = null;
                         } else if (data.type === 'upload_skipped') {
+                            // Keep the server reason. Defaulting a missing one
+                            // to external_endpoint would tell an opted-out user
+                            // that the run measured remote hardware.
                             this.benchUploadSkipped = {
-                                reason: data.reason || 'external_endpoint',
+                                reason: data.reason || null,
                                 features: data.features || [],
                             };
                             this.benchUploading = false;

@@ -200,7 +200,8 @@ class BenchmarkRun:
             "success_count": 0,
             "failed_count": 0,
             "owner_hash": None,  # display hash, populated on upload_done
-            "skipped_reason": None,  # only "external_endpoint" reaches this now
+            # external_endpoint | upload_disabled | ane_aligned_prompt
+            "skipped_reason": None,
             # Always empty. Kept because BenchDTO.swift declares it non-optional,
             # so dropping the key would fail decoding on every app build that has
             # not been updated — which turns into a per-second error loop while the
@@ -213,9 +214,10 @@ class BenchmarkRun:
 
 # Event types that close the SSE stream for a bench run. `done` is NOT
 # terminal — it marks "tests finished, upload starting"; the real end of
-# stream is `upload_done` (or `error`). `upload_skipped` is the external
-# endpoint's last event: without it here, subscribers to an external run would
-# wait for an `upload_done` that never comes.
+# stream is `upload_done` (or `error`). `upload_skipped` ends the stream when
+# nothing is published (external endpoint, upload opt-out, or ANE-aligned
+# prompts). Without it here, subscribers would wait for an `upload_done`
+# that never comes.
 _BENCH_TERMINAL_TYPES = frozenset({"upload_done", "upload_skipped", "error"})
 
 

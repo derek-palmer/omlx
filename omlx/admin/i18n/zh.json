@@ -1945,6 +1945,10 @@
   "usage.unavailable": "使用历史不可用。推理正常继续。",
   "usage.delayed": "历史记录可能不完整：存储延迟或待处理缓冲区已溢出。",
   "usage.loading": "正在加载使用量…",
-  "usage.disabled": "使用历史已关闭。请在设置 → 使用历史中开启。",
-  "usage.open_settings": "打开设置"
+  "usage.disabled": "使用历史已关闭。请在设置 → 使用与共享中开启。",
+  "usage.open_settings": "打开设置",
+  "bench.upload_skipped.reason_disabled": "设置中已关闭上传，因此此结果未发布到 omlx.ai 社区基准测试。",
+  "bench.upload_skipped.reason_ane_aligned": "ANE 对齐提示词使用 PP4097/8193 等非标准长度，因此这些诊断结果保留在本地，不会混入社区 PP4096 分组。",
+  "bench.upload_skipped.reason_unknown": "这些结果未上传到 omlx.ai 社区基准测试。",
+  "acc_bench.upload.skipped_disabled": "未上传（社区上传已关闭）"
 }

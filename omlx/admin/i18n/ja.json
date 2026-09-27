@@ -1945,6 +1945,10 @@
   "usage.unavailable": "使用履歴を利用できません。推論は通常どおり続行します。",
   "usage.delayed": "履歴が不完全な可能性があります: 保存が遅延しているか、保留バッファがあふれました。",
   "usage.loading": "使用履歴を読み込み中…",
-  "usage.disabled": "使用履歴はオフです。設定 → 使用履歴でオンにしてください。",
-  "usage.open_settings": "設定を開く"
+  "usage.disabled": "使用履歴はオフです。設定 → 使用状況と共有でオンにしてください。",
+  "usage.open_settings": "設定を開く",
+  "bench.upload_skipped.reason_disabled": "設定でアップロードが無効になっているため、この結果は omlx.ai コミュニティベンチマークに公開されませんでした。",
+  "bench.upload_skipped.reason_ane_aligned": "ANE 揃えプロンプトは PP4097/8193 のような標準外の長さを使うため、これらの診断結果はコミュニティの PP4096 区分には入らず、ローカルに残します。",
+  "bench.upload_skipped.reason_unknown": "これらの結果は omlx.ai のコミュニティベンチマークにアップロードされませんでした。",
+  "acc_bench.upload.skipped_disabled": "未アップロード（コミュニティへのアップロードは無効）"
 }

@@ -372,10 +372,16 @@
                                             <span class="text-red-400 break-all" x-text="r.upload.error"></span>
                                         </span>
                                     </template>
-                                    <template x-if="r.upload && r.upload.skipped">
+                                    <template x-if="r.upload && r.upload.skipped && r.upload.skipped !== 'upload_disabled'">
                                         <span class="inline-flex items-center gap-1.5 text-neutral-400">
                                             <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
                                             <span>{{ t('acc_bench.upload.skipped_min') }}</span>
+                                        </span>
+                                    </template>
+                                    <template x-if="r.upload && r.upload.skipped === 'upload_disabled'">
+                                        <span class="inline-flex items-center gap-1.5 text-neutral-400">
+                                            <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                                            <span>{{ t('acc_bench.upload.skipped_disabled') }}</span>
                                         </span>
                                     </template>
                                 </div>

@@ -1945,6 +1945,10 @@
   "usage.unavailable": "使用歷史無法使用。推論正常繼續。",
   "usage.delayed": "歷史記錄可能不完整：儲存延遲或待處理緩衝區已溢位。",
   "usage.loading": "正在載入使用量…",
-  "usage.disabled": "使用歷史已關閉。請在設定 → 使用歷史中開啟。",
-  "usage.open_settings": "開啟設定"
+  "usage.disabled": "使用歷史已關閉。請在設定 → 使用與分享中開啟。",
+  "usage.open_settings": "開啟設定",
+  "bench.upload_skipped.reason_disabled": "設定中已關閉上傳，因此此結果未發布至 omlx.ai 社群基準測試。",
+  "bench.upload_skipped.reason_ane_aligned": "ANE 對齊提示詞使用 PP4097/8193 等非標準長度，因此這些診斷結果保留在本機，不會混入社群 PP4096 分組。",
+  "bench.upload_skipped.reason_unknown": "這些結果未上傳至 omlx.ai 社群基準測試。",
+  "acc_bench.upload.skipped_disabled": "未上傳（社群上傳已關閉）"
 }

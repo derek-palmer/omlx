@@ -1945,6 +1945,10 @@
   "usage.unavailable": "O histórico de uso está indisponível. A inferência continua normalmente.",
   "usage.delayed": "O histórico pode estar incompleto: o armazenamento está atrasado ou o buffer pendente transbordou.",
   "usage.loading": "Carregando uso…",
-  "usage.disabled": "O histórico de uso está desativado. Ative-o em Configurações → Histórico de uso.",
-  "usage.open_settings": "Abrir configurações"
+  "usage.disabled": "O histórico de uso está desativado. Ative-o em Configurações → Uso e compartilhamento.",
+  "usage.open_settings": "Abrir configurações",
+  "bench.upload_skipped.reason_disabled": "Os envios estão desativados nas Configurações, portanto este resultado não foi publicado nos benchmarks da comunidade do omlx.ai.",
+  "bench.upload_skipped.reason_ane_aligned": "Prompts alinhados ao ANE usam comprimentos fora do padrão, como PP4097/8193, então estes resultados de diagnóstico ficam locais em vez de entrar nos grupos PP4096 da comunidade.",
+  "bench.upload_skipped.reason_unknown": "Estes resultados não foram enviados aos benchmarks da comunidade omlx.ai.",
+  "acc_bench.upload.skipped_disabled": "Não enviado (envio para a comunidade está desativado)"
 }

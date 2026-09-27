@@ -141,7 +141,9 @@ struct ServerScreen: View {
                                      defaultValue: "Stores hourly per-model token totals in usage.sqlite3. Turning this off keeps existing history.",
                                      comment: "Sublabel explaining the usage history switch")
                 ) {
-                    RowSwitch(isOn: vm.bind($vm.usageHistoryEnabled, save: vm.saveUsageHistory))
+                    RowSwitch(isOn: vm.bind($vm.usageHistoryEnabled) { previous in
+                        vm.saveUsageHistory(previous: previous)
+                    })
                 }
                 Row(
                     label: String(localized: "server.row.benchmark_upload",
@@ -152,7 +154,9 @@ struct ServerScreen: View {
                                      comment: "Sublabel explaining the benchmark upload switch"),
                     isLast: true
                 ) {
-                    RowSwitch(isOn: vm.bind($vm.benchmarkUploadEnabled, save: vm.saveBenchmarkUpload))
+                    RowSwitch(isOn: vm.bind($vm.benchmarkUploadEnabled) { previous in
+                        vm.saveBenchmarkUpload(previous: previous)
+                    })
                 }
             }
 

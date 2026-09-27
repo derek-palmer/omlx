@@ -1945,6 +1945,10 @@
   "usage.unavailable": "El historial de uso no está disponible. La inferencia continúa normalmente.",
   "usage.delayed": "El historial puede estar incompleto: el almacenamiento está retrasado o el búfer pendiente se desbordó.",
   "usage.loading": "Cargando uso…",
-  "usage.disabled": "El historial de uso está desactivado. Actívalo en Ajustes → Historial de uso.",
-  "usage.open_settings": "Abrir ajustes"
+  "usage.disabled": "El historial de uso está desactivado. Actívalo en Ajustes → Uso y compartir.",
+  "usage.open_settings": "Abrir ajustes",
+  "bench.upload_skipped.reason_disabled": "Las cargas están desactivadas en Ajustes, por lo que este resultado no se publicó en los benchmarks de la comunidad de omlx.ai.",
+  "bench.upload_skipped.reason_ane_aligned": "Las instrucciones alineadas con ANE usan longitudes no estándar como PP4097/8193, así que estos resultados de diagnóstico se quedan en local en lugar de unirse a los grupos PP4096 de la comunidad.",
+  "bench.upload_skipped.reason_unknown": "Estos resultados no se subieron a los benchmarks de la comunidad de omlx.ai.",
+  "acc_bench.upload.skipped_disabled": "No cargado (la carga a la comunidad está desactivada)"
 }
