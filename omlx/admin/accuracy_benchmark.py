@@ -19,6 +19,7 @@ from typing import Any, Literal, Optional
 from pydantic import BaseModel, field_validator, model_validator
 
 from .accuracy_upload import build_upload_context, upload_intelligence_result
+from .benchmark import is_benchmark_upload_enabled
 from .external_api import (
     ExternalAPIClient,
     ExternalChatAdapter,
@@ -467,10 +468,20 @@ async def run_accuracy_benchmark(
             # Snapshot the upload context (hardware, quantization, feature
             # flags, submission group). A failure here only disables the
             # community upload, never the benchmark itself.
-            try:
-                run.upload_ctx = build_upload_context(request, engine_pool)
-            except Exception as e:
-                logger.warning(f"Accuracy upload context unavailable: {e}")
+            #
+            # With uploads turned off in Settings the context is never built,
+            # so the hardware fingerprint is not computed at all; upload_ctx
+            # stays None and the existing guard at the upload site suppresses
+            # the POST. Results still accumulate and render locally.
+            if not is_benchmark_upload_enabled():
+                logger.info(
+                    "Accuracy upload disabled in settings; results stay local"
+                )
+            else:
+                try:
+                    run.upload_ctx = build_upload_context(request, engine_pool)
+                except Exception as e:
+                    logger.warning(f"Accuracy upload context unavailable: {e}")
 
         # Phase 3: Run each benchmark
         run.phase = "evaluating"

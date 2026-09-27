@@ -162,6 +162,29 @@ class TestBenchmarkSSEReplay:
         assert elapsed < 0.5, "stream blocked after upload_skipped"
 
     @pytest.mark.asyncio
+    async def test_upload_disabled_skip_is_terminal(self):
+        """Uploads turned off in Settings must close the stream too.
+
+        Same failure mode as external_endpoint: the run ends on
+        upload_skipped, so a subscriber waiting for upload_done would hang
+        until its own timeout.
+        """
+        run = _bench_run()
+        await bench_send_event(run, {"type": "done", "summary": {}})
+        await bench_send_event(
+            run, {"type": "upload_skipped", "reason": "upload_disabled"}
+        )
+
+        start = asyncio.get_event_loop().time()
+        events = await _drain(run, timeout=5.0)
+        elapsed = asyncio.get_event_loop().time() - start
+
+        assert events[-1]["type"] == "upload_skipped"
+        assert events[-1]["reason"] == "upload_disabled"
+        assert run.terminal is True
+        assert elapsed < 0.5, "stream blocked after upload_disabled skip"
+
+    @pytest.mark.asyncio
     async def test_error_is_also_terminal(self):
         run = _bench_run()
         await bench_send_event(run, {"type": "error", "message": "boom"})

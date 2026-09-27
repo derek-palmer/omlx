@@ -948,6 +948,85 @@ class TestCommunityUpload:
         assert "upload" not in run.results[0]
 
     @pytest.mark.asyncio
+    async def test_upload_disabled_keeps_results_local(self):
+        """Settings switch off: no context, no POST, results still kept.
+
+        The context is never built, so the hardware fingerprint inside it is
+        never computed — off means not derived, not derived-and-discarded.
+        """
+        run = create_run(
+            AccuracyBenchmarkRequest(model_id="test-model", benchmarks={"mmlu": 4})
+        )
+        mock_build = MagicMock()
+        mock_upload = AsyncMock()
+
+        with (
+            patch.dict(
+                "omlx.eval.BENCHMARKS",
+                {"mmlu": self._mock_bench_cls("mmlu")},
+                clear=True,
+            ),
+            patch(
+                "omlx.admin.accuracy_benchmark.is_benchmark_upload_enabled",
+                return_value=False,
+            ),
+            patch(
+                "omlx.admin.accuracy_benchmark.build_upload_context", mock_build
+            ),
+            patch(
+                "omlx.admin.accuracy_benchmark.upload_intelligence_result",
+                mock_upload,
+            ),
+        ):
+            await run_accuracy_benchmark(run, self._mock_pool())
+
+        assert run.status == "completed"
+        mock_build.assert_not_called()
+        mock_upload.assert_not_awaited()
+        assert run.upload_ctx is None
+        assert "upload" not in [e["type"] for e in run.events]
+
+        # The benchmark still ran and the score is kept locally — that is the
+        # whole point of the switch.
+        results = get_accumulated_results()
+        assert len(results) == 1
+        assert results[0]["benchmark"] == "mmlu"
+        assert results[0]["accuracy"] == 0.75
+        assert "upload" not in results[0]
+
+    @pytest.mark.asyncio
+    async def test_upload_enabled_is_the_default_path(self):
+        """Guards the gate's polarity: on still builds context and uploads."""
+        run = create_run(
+            AccuracyBenchmarkRequest(model_id="test-model", benchmarks={"mmlu": 4})
+        )
+        mock_build = MagicMock(return_value={"submission_group": "g"})
+        mock_upload = AsyncMock(return_value={"id": "abc"})
+
+        with (
+            patch.dict(
+                "omlx.eval.BENCHMARKS",
+                {"mmlu": self._mock_bench_cls("mmlu")},
+                clear=True,
+            ),
+            patch(
+                "omlx.admin.accuracy_benchmark.is_benchmark_upload_enabled",
+                return_value=True,
+            ),
+            patch(
+                "omlx.admin.accuracy_benchmark.build_upload_context", mock_build
+            ),
+            patch(
+                "omlx.admin.accuracy_benchmark.upload_intelligence_result",
+                mock_upload,
+            ),
+        ):
+            await run_accuracy_benchmark(run, self._mock_pool())
+
+        mock_build.assert_called_once()
+        mock_upload.assert_awaited_once()
+
+    @pytest.mark.asyncio
     async def test_upload_context_failure_only_disables_upload(self):
         run = create_run(
             AccuracyBenchmarkRequest(model_id="test-model", benchmarks={"mmlu": 4})

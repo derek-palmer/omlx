@@ -21,6 +21,10 @@ final class ServerScreenVM {
     /// Live switch; commits through `saveUsageHistory()` like the other
     /// auto-apply rows rather than the Apply button.
     var usageHistoryEnabled: Bool = true
+    /// Opt-out for publishing benchmark runs to the omlx.ai leaderboard.
+    /// Defaults on to match the server, and is independent of the history
+    /// switch above — local results are kept either way.
+    var benchmarkUploadEnabled: Bool = true
     var lastError: String?
     private(set) var isMovingBasePath: Bool = false
 
@@ -85,6 +89,7 @@ final class ServerScreenVM {
             }
             self.hfCacheEnabled = dto.huggingface?.hfCacheEnabled ?? true
             self.usageHistoryEnabled = dto.usage?.usageHistory ?? true
+            self.benchmarkUploadEnabled = dto.usage?.benchmarkUpload ?? true
             if let s = dto.sampling {
                 self.samplingContextText = String(s.maxContextWindow)
                 self.samplingMaxTokensText = String(s.maxTokens)
@@ -589,6 +594,10 @@ final class ServerScreenVM {
 
     func saveUsageHistory() {
         Task { await commit(GlobalSettingsPatch(usageHistory: usageHistoryEnabled)) }
+    }
+
+    func saveBenchmarkUpload() {
+        Task { await commit(GlobalSettingsPatch(benchmarkUpload: benchmarkUploadEnabled)) }
     }
 
     func saveAutoStartOnLaunch(services: AppServices) {

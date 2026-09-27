@@ -254,6 +254,8 @@ Set up OpenClaw, OpenCode, Codex, Hermes Agent, Copilot, and Pi directly from th
 
 One-click benchmarking from the admin panel. Measures prefill (PP) and text generation (TG) tokens per second, with partial prefix cache hit testing for realistic performance numbers.
 
+Completed runs are published to the [omlx.ai community leaderboard](https://omlx.ai/benchmarks) by default, along with your hardware profile and a pseudonymous machine ID. Turn this off with **Upload benchmark results** (Settings → Usage & Sharing) or `OMLX_BENCHMARK_UPLOAD=0`; benchmarks still run and results stay local. See [community benchmark submission](docs/usage-analytics.md#community-benchmark-submission) for exactly what is sent.
+
 <p align="center">
   <img src="docs/images/benchmark_omlx.png" alt="oMLX Benchmark Tool" width="720">
 </p>

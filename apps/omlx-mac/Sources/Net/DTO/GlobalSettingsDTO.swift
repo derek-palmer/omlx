@@ -181,8 +181,13 @@ struct GlobalSettingsDTO: Codable, Equatable, Sendable {
     /// local hourly serving history behind Status → Usage History. Patched
     /// via the flat `usage_history` key; the server applies it live and keeps
     /// the existing usage.sqlite3 when it is turned off.
+    ///
+    /// `benchmark_upload` is the separate opt-out for publishing completed
+    /// benchmark runs to the omlx.ai community leaderboard. The two are
+    /// independent: local history never leaves the machine either way.
     struct UsageSettings: Codable, Equatable, Sendable {
         let usageHistory: Bool?
+        let benchmarkUpload: Bool?
     }
 
     /// Mirrors `omlx.settings.ModelScopeSettings`. Empty string means
@@ -251,6 +256,11 @@ struct GlobalSettingsPatch: Encodable, Equatable, Sendable {
     /// runtime; turning it off keeps the existing usage.sqlite3 so turning
     /// it back on resumes the same history.
     var usageHistory: Bool? = nil
+
+    /// Publish completed benchmark runs to the omlx.ai community leaderboard.
+    /// Read at the start of each run, so it takes effect on the next run with
+    /// no restart. Off keeps runs and local results; only publishing stops.
+    var benchmarkUpload: Bool? = nil
 
     // Auth (PR 9)
     var skipApiKeyVerification: Bool? = nil

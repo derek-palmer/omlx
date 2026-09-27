@@ -236,6 +236,47 @@ final class GlobalSettingsSamplingTests: XCTestCase {
         XCTAssertNil(empty["usage_history"])
     }
 
+    func testBenchmarkUploadDecodesAndDefaultsToNilOnOlderServers() throws {
+        let json = """
+        {
+            "server": {"host": "127.0.0.1", "port": 8080, "log_level": "info", "server_aliases": []},
+            "usage": {"usage_history": true, "benchmark_upload": false}
+        }
+        """.data(using: .utf8)!
+        let usage = try decoder.decode(GlobalSettingsDTO.self, from: json).usage
+        XCTAssertEqual(usage?.benchmarkUpload, false)
+        // Independent of the history switch.
+        XCTAssertEqual(usage?.usageHistory, true)
+
+        // A server predating the opt-out omits the key; the view model then
+        // falls back to `true`, matching the server-side default.
+        let older = """
+        {
+            "server": {"host": "127.0.0.1", "port": 8080, "log_level": "info", "server_aliases": []},
+            "usage": {"usage_history": true}
+        }
+        """.data(using: .utf8)!
+        XCTAssertNil(try decoder.decode(GlobalSettingsDTO.self, from: older).usage?.benchmarkUpload)
+    }
+
+    func testPatchEncodesBenchmarkUploadAsSnakeCaseFlatKey() throws {
+        var patch = GlobalSettingsPatch()
+        patch.benchmarkUpload = false
+
+        let json = try JSONSerialization.jsonObject(
+            with: try encoder.encode(patch)
+        ) as! [String: Any]
+
+        XCTAssertEqual(json["benchmark_upload"] as? Bool, false)
+        // Patching one switch must not send the other.
+        XCTAssertNil(json["usage_history"])
+
+        let empty = try JSONSerialization.jsonObject(
+            with: try encoder.encode(GlobalSettingsPatch())
+        ) as! [String: Any]
+        XCTAssertNil(empty["benchmark_upload"])
+    }
+
     func testServerDecodesAudioUploadSize() throws {
         let json = """
         {

@@ -831,7 +831,10 @@ class TestUsageSettings:
     def test_to_dict_from_dict_round_trip(self):
         settings = UsageSettings.from_dict({"usage_history": False})
         assert settings.usage_history is False
-        assert settings.to_dict() == {"usage_history": False}
+        assert settings.to_dict() == {
+            "usage_history": False,
+            "benchmark_upload": True,
+        }
         assert UsageSettings.from_dict({}).usage_history is True
 
     def test_global_settings_save_load_round_trip(self, tmp_path):
@@ -839,8 +842,11 @@ class TestUsageSettings:
         gs.usage.usage_history = False
         gs.save()
         data = json.loads((tmp_path / "settings.json").read_text())
-        assert data["usage"] == {"usage_history": False}
-        assert gs.to_dict()["usage"] == {"usage_history": False}
+        assert data["usage"] == {"usage_history": False, "benchmark_upload": True}
+        assert gs.to_dict()["usage"] == {
+            "usage_history": False,
+            "benchmark_upload": True,
+        }
         restored = GlobalSettings.load(base_path=tmp_path)
         assert restored.usage.usage_history is False
 
@@ -871,6 +877,72 @@ class TestUsageSettings:
         gs.save()
         monkeypatch.setenv("OMLX_USAGE_HISTORY", value)
         assert GlobalSettings.load(base_path=tmp_path).usage.usage_history is expected
+
+
+class TestBenchmarkUploadSetting:
+    """Tests for the community benchmark upload opt-out."""
+
+    def test_defaults_on(self):
+        """Existing installs keep uploading; the switch is an opt-out."""
+        assert UsageSettings().benchmark_upload is True
+        assert GlobalSettings().usage.benchmark_upload is True
+
+    def test_round_trip_when_off(self):
+        settings = UsageSettings.from_dict({"benchmark_upload": False})
+        assert settings.benchmark_upload is False
+        assert UsageSettings.from_dict(settings.to_dict()).benchmark_upload is False
+
+    def test_save_load_round_trip(self, tmp_path):
+        gs = GlobalSettings(base_path=tmp_path)
+        gs.usage.benchmark_upload = False
+        gs.save()
+        restored = GlobalSettings.load(base_path=tmp_path)
+        assert restored.usage.benchmark_upload is False
+        # The independent switch is untouched by the new one.
+        assert restored.usage.usage_history is True
+
+    def test_legacy_settings_file_defaults_on(self, tmp_path):
+        """A settings.json predating the switch keeps uploading."""
+        gs = GlobalSettings(base_path=tmp_path)
+        gs.save()
+        settings_file = tmp_path / "settings.json"
+        data = json.loads(settings_file.read_text())
+        del data["usage"]["benchmark_upload"]
+        settings_file.write_text(json.dumps(data))
+        assert GlobalSettings.load(base_path=tmp_path).usage.benchmark_upload is True
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("0", False),
+            ("false", False),
+            ("off", False),
+            ("no", False),
+            ("1", True),
+            ("true", True),
+            ("on", True),
+            ("yes", True),
+            (" FALSE ", False),
+            ("TRUE", True),
+        ],
+    )
+    def test_env_override(self, tmp_path, monkeypatch, value, expected):
+        """OMLX_BENCHMARK_UPLOAD overrides the saved value at startup."""
+        gs = GlobalSettings(base_path=tmp_path)
+        gs.usage.benchmark_upload = not expected
+        gs.save()
+        monkeypatch.setenv("OMLX_BENCHMARK_UPLOAD", value)
+        restored = GlobalSettings.load(base_path=tmp_path)
+        assert restored.usage.benchmark_upload is expected
+
+    def test_switches_are_independent(self, tmp_path, monkeypatch):
+        """Turning off uploads must not turn off local usage history."""
+        gs = GlobalSettings(base_path=tmp_path)
+        gs.save()
+        monkeypatch.setenv("OMLX_BENCHMARK_UPLOAD", "0")
+        restored = GlobalSettings.load(base_path=tmp_path)
+        assert restored.usage.benchmark_upload is False
+        assert restored.usage.usage_history is True
 
 
 class TestHuggingFaceSettings:

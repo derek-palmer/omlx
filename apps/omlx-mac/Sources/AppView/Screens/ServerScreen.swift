@@ -127,8 +127,8 @@ struct ServerScreen: View {
             }
 
             SectionHeader(String(localized: "server.section.usage",
-                                  defaultValue: "Usage History",
-                                  comment: "Section heading for the local usage history switch in Server screen"))
+                                  defaultValue: "Usage & Sharing",
+                                  comment: "Section heading for the local usage history and benchmark upload switches in Server screen"))
             // Deep-link target for the Status screen's "Usage history is off"
             // notice (see AppServices.ServerAnchor.usageHistory).
             .id(ServerAnchor.usageHistory.rawValue)
@@ -139,10 +139,20 @@ struct ServerScreen: View {
                                   comment: "Row label for the switch that records local hourly usage history"),
                     sublabel: String(localized: "server.row.usage_history.sub",
                                      defaultValue: "Stores hourly per-model token totals in usage.sqlite3. Turning this off keeps existing history.",
-                                     comment: "Sublabel explaining the usage history switch"),
-                    isLast: true
+                                     comment: "Sublabel explaining the usage history switch")
                 ) {
                     RowSwitch(isOn: vm.bind($vm.usageHistoryEnabled, save: vm.saveUsageHistory))
+                }
+                Row(
+                    label: String(localized: "server.row.benchmark_upload",
+                                  defaultValue: "Upload benchmark results",
+                                  comment: "Row label for the switch that publishes benchmark runs to the omlx.ai leaderboard"),
+                    sublabel: String(localized: "server.row.benchmark_upload.sub",
+                                     defaultValue: "Publishes runs to the omlx.ai leaderboard with your hardware profile and an anonymous machine ID. Off keeps runs and local results.",
+                                     comment: "Sublabel explaining the benchmark upload switch"),
+                    isLast: true
+                ) {
+                    RowSwitch(isOn: vm.bind($vm.benchmarkUploadEnabled, save: vm.saveBenchmarkUpload))
                 }
             }
 

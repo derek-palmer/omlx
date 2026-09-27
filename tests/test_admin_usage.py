@@ -21,6 +21,8 @@ USAGE_HISTORY_I18N_KEYS = {
     "settings.usage.section_label",
     "settings.usage.history",
     "settings.usage.history_hint",
+    "settings.usage.benchmark_upload",
+    "settings.usage.benchmark_upload_hint",
     "usage.disabled",
     "usage.open_settings",
 }
@@ -195,7 +197,7 @@ def test_global_settings_toggle_applies_at_runtime(client, tmp_path, monkeypatch
     monkeypatch.setattr(admin_routes, "_get_global_settings", lambda: gs)
 
     current = asyncio.run(admin_routes.get_global_settings(is_admin=True))
-    assert current["usage"] == {"usage_history": True}
+    assert current["usage"] == {"usage_history": True, "benchmark_upload": True}
 
     result = asyncio.run(
         admin_routes.update_global_settings(
@@ -238,6 +240,49 @@ def test_global_settings_toggle_applies_at_runtime(client, tmp_path, monkeypatch
     assert gs.usage.usage_history is True
 
 
+def test_benchmark_upload_toggle_round_trips(client, tmp_path, monkeypatch):
+    """The opt-out persists and does not disturb the usage-history switch."""
+    from omlx.admin import routes as admin_routes
+    from omlx.settings import GlobalSettings
+
+    _client, _metrics = client
+    base_path = tmp_path / "settings-upload"
+    gs = GlobalSettings(base_path=base_path)
+    monkeypatch.setattr(admin_routes, "_get_global_settings", lambda: gs)
+
+    result = asyncio.run(
+        admin_routes.update_global_settings(
+            request=admin_routes.GlobalSettingsRequest(benchmark_upload=False),
+            is_admin=True,
+        )
+    )
+    assert result["success"] is True
+    assert "benchmark_upload" in result["runtime_applied"]
+    assert gs.usage.benchmark_upload is False
+    assert GlobalSettings.load(base_path=base_path).usage.benchmark_upload is False
+    # Independent of local history recording.
+    assert gs.usage.usage_history is True
+
+    current = asyncio.run(admin_routes.get_global_settings(is_admin=True))
+    assert current["usage"]["benchmark_upload"] is False
+
+    asyncio.run(
+        admin_routes.update_global_settings(
+            request=admin_routes.GlobalSettingsRequest(benchmark_upload=True),
+            is_admin=True,
+        )
+    )
+    assert gs.usage.benchmark_upload is True
+
+    untouched = asyncio.run(
+        admin_routes.update_global_settings(
+            request=admin_routes.GlobalSettingsRequest(), is_admin=True
+        )
+    )
+    assert "benchmark_upload" not in untouched["runtime_applied"]
+    assert gs.usage.benchmark_upload is True
+
+
 def test_dashboard_renders_usage_history_switch_and_disabled_notice(client):
     client, _ = client
     html = client.get("/admin/dashboard").text
@@ -248,8 +293,20 @@ def test_dashboard_renders_usage_history_switch_and_disabled_notice(client):
     javascript = (ROOT / "omlx/admin/static/js/dashboard.js").read_text(
         encoding="utf-8"
     )
-    assert "usage: { usage_history: true }" in javascript
+    assert "usage_history: true" in javascript
     assert "usage_history: this.globalSettings.usage.usage_history" in javascript
+
+
+def test_dashboard_renders_benchmark_upload_switch(client):
+    client, _ = client
+    html = client.get("/admin/dashboard").text
+    assert "globalSettings.usage.benchmark_upload" in html
+    assert "Upload benchmark results" in html
+    javascript = (ROOT / "omlx/admin/static/js/dashboard.js").read_text(
+        encoding="utf-8"
+    )
+    assert "benchmark_upload: true" in javascript
+    assert "benchmark_upload: this.globalSettings.usage.benchmark_upload" in javascript
 
 
 def test_usage_history_i18n_keys_present_in_every_locale():
